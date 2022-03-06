@@ -38,9 +38,11 @@ Resources:
         Fn::Base64: |
           #!/bin/bash
           yum update -y
+          yum install -y git
           git clone https://github.com/souhub/fastapi-tutorial
           cd ./fastapi-tutorial
           pip3 install -r ./docker/api/requirements.txt
+          pip3 install uvicorn
           cd ./app && uvicorn main:app --reload --port=8000 --host=0.0.0.0
 
       Tags:
