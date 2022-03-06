@@ -1,0 +1,14 @@
+version: "3.5"
+
+services:
+  api:
+    image: "fastapi_api:v0.1"
+    build:
+      context: ./docker/api
+    ports:
+      - "8888:8000"
+    volumes:
+      - ./app:/usr/src/app
+      - ./scripts:/usr/src/scripts
+    working_dir: /usr/src/scripts
+    command: bash ./run.sh

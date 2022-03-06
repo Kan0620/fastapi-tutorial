@@ -1,0 +1,196 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  Prefix:
+    Type: String
+  Environment:
+    Type: String
+    AllowedValues:
+      - staging
+      - production
+  Region:
+    Type: String
+
+Mappings:
+  EnvironmentMap:
+    # staging:
+    #   VpcCidrBlock: 171.0.0.0/16
+    #   PublicSubnetACidrBlock: 171.0.1.0/24
+    #   PublicSubnetCCidrBlock: 171.0.2.0/24
+    #   DBPrivateSubnetACidrBlock: 171.0.11.0/24
+    #   DBPrivateSubnetCCidrBlock: 171.0.12.0/24
+    production:
+      VpcCidrBlock: 170.0.0.0/16
+      PublicSubnetACidrBlock: 170.0.1.0/24
+      PublicSubnetCCidrBlock: 170.0.2.0/24
+      DBPrivateSubnetACidrBlock: 170.0.11.0/24
+      DBPrivateSubnetCCidrBlock: 170.0.12.0/24
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock:
+        Fn::FindInMap: [EnvironmentMap, Ref: Environment, VpcCidrBlock]
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join: ["-", [Ref: Prefix, Ref: Environment]]
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: VPC
+      CidrBlock:
+        Fn::FindInMap:
+          [EnvironmentMap, Ref: Environment, PublicSubnetACidrBlock]
+      AvailabilityZone:
+        Fn::Join: ["", [Ref: Region, "a"]]
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "PublicSubnetA"]]
+
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: VPC
+      CidrBlock:
+        Fn::FindInMap:
+          [EnvironmentMap, Ref: Environment, PublicSubnetCCidrBlock]
+      AvailabilityZone:
+        Fn::Join: ["", [Ref: Region, "c"]]
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "PublicSubnetC"]]
+
+  # DBPrivateSubnetA:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     AvailabilityZone:
+  #       Fn::Join: ["", [Ref: Region, "a"]]
+  #     VpcId:
+  #       Ref: VPC
+  #     CidrBlock:
+  #       Fn::FindInMap:
+  #         [EnvironmentMap, Ref: Environment, DBPrivateSubnetACidrBlock]
+  #     Tags:
+  #       - Key: Name
+  #         Value:
+  #           Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "DBPrivateSubnetA"]]
+
+  # DBPrivateSubnetC:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     AvailabilityZone:
+  #       Fn::Join: ["", [Ref: Region, "c"]]
+  #     VpcId:
+  #       Ref: VPC
+  #     CidrBlock:
+  #       Fn::FindInMap:
+  #         [EnvironmentMap, Ref: Environment, DBPrivateSubnetCCidrBlock]
+  #     Tags:
+  #       - Key: Name
+  #         Value:
+  #           Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "DBPrivateSubnetC"]]
+
+  # インターネットゲートウェイ
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join: ["-", [Ref: Prefix, Ref: Environment]]
+
+  # インターネットゲートウェイの紐付け
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: VPC
+      InternetGatewayId:
+        Ref: InternetGateway
+
+  # ルートテーブル
+  InternetGatewayRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              [
+                "-",
+                [Ref: Prefix, Ref: Environment, "InternetGatewayRouteTable"],
+              ]
+
+  # ルート
+  InternetRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId:
+        Ref: InternetGatewayRouteTable
+      GatewayId:
+        Ref: InternetGateway
+    DependsOn: VPCGatewayAttachment
+
+  PublicSubnetAAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: InternetGatewayRouteTable
+      SubnetId:
+        Ref: PublicSubnetA
+
+  PublicSubnetCAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: InternetGatewayRouteTable
+      SubnetId:
+        Ref: PublicSubnetC
+
+Outputs:
+  VPC:
+    Value:
+      Ref: VPC
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-VPC"
+
+  PublicSubnetA:
+    Value:
+      Ref: PublicSubnetA
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-PublicSubnetA"
+
+  PublicSubnetC:
+    Value:
+      Ref: PublicSubnetC
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-PublicSubnetC"
+
+  # DBPrivateSubnetA:
+  #   Value:
+  #     Ref: DBPrivateSubnetA
+  #   Export:
+  #     Name:
+  #       Fn::Sub: "${AWS::StackName}-DBPrivateSubnetA"
+
+  # DBPrivateSubnetC:
+  #   Value:
+  #     Ref: DBPrivateSubnetC
+  #   Export:
+  #     Name:
+  #       Fn::Sub: "${AWS::StackName}-DBPrivateSubnetC"

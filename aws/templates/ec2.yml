@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  Prefix:
+    Type: String
+  Environment:
+    Type: String
+    AllowedValues:
+      - staging
+      - production
+  Region:
+    Type: String
+  SGStackName:
+    Type: String
+  VPCStackName:
+    Type: String
+  AMIImageId:
+    Type: String
+
+Resources:
+  EC2InstanceA:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:
+        Ref: AMIImageId
+      # KeyName: YOU_HAVE_TO_SET_A_KEY_TO_USE_SSH_CONNECTION
+      InstanceType: t2.micro
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId:
+            Fn::ImportValue:
+              Fn::Join: ["-", [Ref: VPCStackName, "PublicSubnetA"]]
+          GroupSet:
+            - Fn::ImportValue:
+                Fn::Join: ["-", [Ref: SGStackName, ApplicationSecurityGroup]]
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum update -y
+          pip install -r requirements.txt
+          sudo yum -y install git
+          git clone
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "EC2InstanceA"]]
+
+  # EC2InstanceC:
+  #   Type: AWS::EC2::Instance
+  #   Properties:
+  #     ImageId:
+  #       Ref: AMIImageId
+  #     # KeyName: YOU_HAVE_TO_SET_A_KEY_TO_USE_SSH_CONNECTION
+  #     InstanceType: t2.micro
+  #     NetworkInterfaces:
+  #       - AssociatePublicIpAddress: "true"
+  #         DeviceIndex: "0"
+  #         SubnetId:
+  #           Fn::ImportValue:
+  #             Fn::Join: ["-", [Ref: VPCStackName, "PublicSubnetC"]]
+  #         GroupSet:
+  #           - Fn::ImportValue:
+  #               Fn::Join: ["-", [Ref: SGStackName, ApplicationSecurityGroup]]
+  #     UserData:
+  #       Fn::Base64: |
+  #         #!/bin/bash
+  #         yum update -y
+  #         amazon-linux-extras install nginx1
+  #         systemctl start nginx.service
+  #         systemctl enable nginx.service
+  #     Tags:
+  #       - Key: Name
+  #         Value:
+  #           Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "EC2InstanceC"]]
+Outputs:
+  EC2InstanceA:
+    Value:
+      Ref: EC2InstanceA
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-EC2InstanceA"
+
+  # EC2InstanceC:
+  #   Value:
+  #     Ref: EC2InstanceC
+  #   Export:
+  #     Name:
+  #       Fn::Sub: "${AWS::StackName}-EC2InstanceC"
