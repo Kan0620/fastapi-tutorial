@@ -69,36 +69,6 @@ Resources:
           Value:
             Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "PublicSubnetC"]]
 
-  # DBPrivateSubnetA:
-  #   Type: AWS::EC2::Subnet
-  #   Properties:
-  #     AvailabilityZone:
-  #       Fn::Join: ["", [Ref: Region, "a"]]
-  #     VpcId:
-  #       Ref: VPC
-  #     CidrBlock:
-  #       Fn::FindInMap:
-  #         [EnvironmentMap, Ref: Environment, DBPrivateSubnetACidrBlock]
-  #     Tags:
-  #       - Key: Name
-  #         Value:
-  #           Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "DBPrivateSubnetA"]]
-
-  # DBPrivateSubnetC:
-  #   Type: AWS::EC2::Subnet
-  #   Properties:
-  #     AvailabilityZone:
-  #       Fn::Join: ["", [Ref: Region, "c"]]
-  #     VpcId:
-  #       Ref: VPC
-  #     CidrBlock:
-  #       Fn::FindInMap:
-  #         [EnvironmentMap, Ref: Environment, DBPrivateSubnetCCidrBlock]
-  #     Tags:
-  #       - Key: Name
-  #         Value:
-  #           Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "DBPrivateSubnetC"]]
-
   # インターネットゲートウェイ
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -180,17 +150,3 @@ Outputs:
     Export:
       Name:
         Fn::Sub: "${AWS::StackName}-PublicSubnetC"
-
-  # DBPrivateSubnetA:
-  #   Value:
-  #     Ref: DBPrivateSubnetA
-  #   Export:
-  #     Name:
-  #       Fn::Sub: "${AWS::StackName}-DBPrivateSubnetA"
-
-  # DBPrivateSubnetC:
-  #   Value:
-  #     Ref: DBPrivateSubnetC
-  #   Export:
-  #     Name:
-  #       Fn::Sub: "${AWS::StackName}-DBPrivateSubnetC"

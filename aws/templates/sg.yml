@@ -12,28 +12,6 @@ Parameters:
     Type: String
 
 Resources:
-  # ALBSecurityGroup:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupDescription: "ALB Security Group"
-  #     VpcId:
-  #       Fn::ImportValue:
-  #         Fn::Join: ["-", [Ref: VPCStackName, "VPC"]]
-  #     # HTTPS (443) のインバウンドを許可
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         FromPort: 443
-  #         ToPort: 443
-  #         CidrIp: 0.0.0.0/0
-  #       - IpProtocol: tcp
-  #         FromPort: 80
-  #         ToPort: 80
-  #         CidrIp: 0.0.0.0/0
-  #     Tags:
-  #       - Key: Name
-  #         Value:
-  #           Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "alb"]]
-
   ApplicationSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -44,12 +22,13 @@ Resources:
       # HTTP (80), HTTP (8080) のインバウンドを許可
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+          FromPort: 8000
+          ToPort: 8000
           CidrIp: 0.0.0.0/0
           # SourceSecurityGroupId:
           #   Ref: ALBSecurityGroup
         # SSH接続を許可（ec2.ymlでKeyNameの設定の必要あり）
+
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
@@ -59,43 +38,10 @@ Resources:
           Value:
             Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "application"]]
 
-  # DatabaseSecurityGroup:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupDescription: "Database Security Group"
-  #     VpcId:
-  #       Fn::ImportValue:
-  #         Fn::Join: ["-", [Ref: VPCStackName, "VPC"]]
-  #     # MySQL/Aurora (3306) のインバウンドを許可
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         FromPort: 3306
-  #         ToPort: 3306
-  #         SourceSecurityGroupId:
-  #           Ref: ApplicationSecurityGroup
-  #     Tags:
-  #       - Key: Name
-  #         Value:
-  #           Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "database"]]
-
 Outputs:
-  # ALBSecurityGroup:
-  #   Value:
-  #     Ref: ALBSecurityGroup
-  #   Export:
-  #     Name:
-  #       Fn::Sub: "${AWS::StackName}-ALBSecurityGroup"
-
   ApplicationSecurityGroup:
     Value:
       Ref: ApplicationSecurityGroup
     Export:
       Name:
         Fn::Sub: "${AWS::StackName}-ApplicationSecurityGroup"
-
-  # DatabaseSecurityGroup:
-  #   Value:
-  #     Ref: DatabaseSecurityGroup
-  #   Export:
-  #     Name:
-  #       Fn::Sub: "${AWS::StackName}-DatabaseSecurityGroup"

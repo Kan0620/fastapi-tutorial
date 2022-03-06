@@ -23,7 +23,7 @@ Resources:
     Properties:
       ImageId:
         Ref: AMIImageId
-      # KeyName: YOU_HAVE_TO_SET_A_KEY_TO_USE_SSH_CONNECTION
+      KeyName: MyKeyPair
       InstanceType: t2.micro
       NetworkInterfaces:
         - AssociatePublicIpAddress: "true"
@@ -38,41 +38,16 @@ Resources:
         Fn::Base64: |
           #!/bin/bash
           yum update -y
-          pip install -r requirements.txt
-          sudo yum -y install git
-          git clone
+          git clone https://github.com/souhub/fastapi-tutorial
+          cd ./fastapi-tutorial
+          pip3 install -r ./docker/api/requirements.txt
+          cd ./app && uvicorn main:app --reload --port=8000 --host=0.0.0.0
+
       Tags:
         - Key: Name
           Value:
             Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "EC2InstanceA"]]
 
-  # EC2InstanceC:
-  #   Type: AWS::EC2::Instance
-  #   Properties:
-  #     ImageId:
-  #       Ref: AMIImageId
-  #     # KeyName: YOU_HAVE_TO_SET_A_KEY_TO_USE_SSH_CONNECTION
-  #     InstanceType: t2.micro
-  #     NetworkInterfaces:
-  #       - AssociatePublicIpAddress: "true"
-  #         DeviceIndex: "0"
-  #         SubnetId:
-  #           Fn::ImportValue:
-  #             Fn::Join: ["-", [Ref: VPCStackName, "PublicSubnetC"]]
-  #         GroupSet:
-  #           - Fn::ImportValue:
-  #               Fn::Join: ["-", [Ref: SGStackName, ApplicationSecurityGroup]]
-  #     UserData:
-  #       Fn::Base64: |
-  #         #!/bin/bash
-  #         yum update -y
-  #         amazon-linux-extras install nginx1
-  #         systemctl start nginx.service
-  #         systemctl enable nginx.service
-  #     Tags:
-  #       - Key: Name
-  #         Value:
-  #           Fn::Join: ["-", [Ref: Prefix, Ref: Environment, "EC2InstanceC"]]
 Outputs:
   EC2InstanceA:
     Value:
@@ -80,10 +55,3 @@ Outputs:
     Export:
       Name:
         Fn::Sub: "${AWS::StackName}-EC2InstanceA"
-
-  # EC2InstanceC:
-  #   Value:
-  #     Ref: EC2InstanceC
-  #   Export:
-  #     Name:
-  #       Fn::Sub: "${AWS::StackName}-EC2InstanceC"
