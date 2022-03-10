@@ -6,4 +6,4 @@ class PredictRequest(BaseModel):
 
 
 class PredictResponse(BaseModel):
-    result: float = Field(..., title="result", description="Predict value", example=0.9)
+    result: dict = Field(..., title="result", description="Predict value", example="Input text for ML")

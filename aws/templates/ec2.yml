@@ -39,7 +39,7 @@ Resources:
           #!/bin/bash
           yum update -y
           yum install -y git
-          git clone https://github.com/souhub/fastapi-tutorial
+          git clone https://github.com/Kan0620/fastapi-tutorial
           cd ./fastapi-tutorial
           pip3 install -r ./docker/api/requirements.txt
           pip3 install uvicorn
