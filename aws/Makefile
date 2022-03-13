@@ -3,7 +3,8 @@ PREFIX:=souhub-fastapi-tutorial
 
 PROFILE:=default
 REGION:=ap-northeast-1
-ENV:=staging
+# ENV:=staging
+ENV:=production
 AWS_COMMAND_PREFIX := docker compose run --rm api
 
 # Amazon Linux2 AMI

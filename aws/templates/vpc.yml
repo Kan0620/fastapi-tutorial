@@ -13,12 +13,12 @@ Parameters:
 
 Mappings:
   EnvironmentMap:
-    # staging:
-    #   VpcCidrBlock: 171.0.0.0/16
-    #   PublicSubnetACidrBlock: 171.0.1.0/24
-    #   PublicSubnetCCidrBlock: 171.0.2.0/24
-    #   DBPrivateSubnetACidrBlock: 171.0.11.0/24
-    #   DBPrivateSubnetCCidrBlock: 171.0.12.0/24
+    staging:
+      VpcCidrBlock: 171.0.0.0/16
+      PublicSubnetACidrBlock: 171.0.1.0/24
+      PublicSubnetCCidrBlock: 171.0.2.0/24
+      DBPrivateSubnetACidrBlock: 171.0.11.0/24
+      DBPrivateSubnetCCidrBlock: 171.0.12.0/24
     production:
       VpcCidrBlock: 170.0.0.0/16
       PublicSubnetACidrBlock: 170.0.1.0/24
